@@ -1,7 +1,11 @@
 const express = require("express");
 const { UserModel } = require("../Model/user.model");
-
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+require("dotenv").config();
 userRouter = express.Router();
+
+// user register Route
 
 userRouter.post("/register", async (req, res) => {
   try {
@@ -26,11 +30,39 @@ userRouter.post("/register", async (req, res) => {
         .send({ mag: "user register successfully !", user: newUser });
     }
   } catch (error) {
-    res.status(400).send({msg : error.message});
+    res.status(400).send({ msg: error.message });
   }
 });
 
+// user Login route
 
-module.exports= {
-    userRouter
-}
+userRouter.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const user = await UserModel.findOne({ email: email });
+    if (user) {
+      const decodeHash = bcrypt.compareSync(password, user.password);
+      if (decodeHash) {
+        const token = jwt.sign(
+          {
+            userID: user._id,
+            userName: user.name,
+          },
+          process.env.SECRETKEY,
+          { expiresIn: "2 days" }
+        );
+        res.status(200).send({ msg: "User login successfully!", token: token });
+      }else{
+        res.status(400).send({ msg: "please Check Your password first!" });
+      }
+    } else {
+      res.status(200).send({ msg: "please register first!" });
+    }
+  } catch (error) {
+    res.status(400).send({ msg: error.message });
+  }
+});
+
+module.exports = {
+  userRouter,
+};
