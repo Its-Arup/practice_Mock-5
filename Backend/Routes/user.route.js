@@ -4,7 +4,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { BlackList_Token } = require("../Model/blackList.model");
 require("dotenv").config();
-userRouter = express.Router();
+const userRouter = express.Router();
 
 // user register Route
 
